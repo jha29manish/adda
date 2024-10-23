@@ -1,0 +1,68 @@
+//Linear and binary search
+#include<iostream>
+#include<algorithm>
+#include<vector>
+using namespace std;
+void linearSearch(vector<int> v,int element){
+    for(int i=0;i<v.size();i++){
+        if(v[i]==element){
+            cout<<"Element found at index:"<<i<<endl;
+            return;
+        }
+    }
+    cout<<"Element not found"<<endl;
+}
+void binarySearch(vector<int>&v,int element,int low,int high){
+    while(low<=high){
+        int mid=low+(high-low)/2;
+        if(v[mid]==element){
+            cout<<"Element found at index "<<mid;
+            return;
+        }
+        if(v[mid]<element){
+            low=mid+1;
+        }
+        else{
+            high=mid-1;
+        }
+    }
+    cout<<"Element not found"<<endl;
+}
+
+int main(){
+    int n,element,choice;
+    cout<<"Input the size of array:";
+    cin>>n;
+    vector<int>v(n);
+    cout<<"Input elements of the array"<<endl;
+    for(int i=0;i<v.size();i++){
+        cout<<"Element "<<i+1<<": ";
+        cin>>v[i];
+    }
+    cout<<endl;
+    cout<<"Input the element to search:";
+    cin>>element;
+    cout<<"Searching Methods Available:"<<endl;
+    cout<<"1. Linear Search"<<endl;
+    cout<<"2. Binary Search"<<endl;
+    cout<<"How do you want to search:";
+    cin>>choice;
+    switch(choice){
+        case 1:
+            linearSearch(v,element);
+            break;
+        case 2:
+            sort(v.begin(),v.end());
+            cout<<"Array after sorting:";
+            for(int i:v){
+                cout<<i<<" ";
+            }
+            cout<<endl;
+            binarySearch(v,element,0,n-1);
+            break;
+        default:
+            cout<<"Invalid Choice";
+            break;
+    }
+    return 0;
+}
