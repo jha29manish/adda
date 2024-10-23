@@ -1,0 +1,132 @@
+//Huffman Coding 
+
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <unordered_map>
+#include <string>
+#include <iomanip>
+using namespace std;
+struct Node
+{
+    char ch;
+    int freq;
+    Node *left, *right;
+    Node(char character, int frequency)
+        : ch(character), freq(frequency), left(nullptr), right(nullptr) {}
+};
+struct Compare
+{
+    bool operator()(Node *l, Node *r)
+    {
+        return l->freq > r->freq;
+    }
+};
+Node *buildHuffmanTree(const unordered_map<char, int> &freqs)
+{
+    priority_queue<Node *, vector<Node *>, Compare> minHeap;
+    for (const auto &pair : freqs)
+    {
+        minHeap.push(new Node(pair.first, pair.second));
+    }
+    while (minHeap.size() > 1)
+    {
+        Node *left = minHeap.top();
+        minHeap.pop();
+        Node *right = minHeap.top();
+        minHeap.pop();
+        Node *top = new Node('$', left->freq + right->freq);
+        top->left = left;
+        top->right = right;
+        minHeap.push(top);
+    }
+    return minHeap.top();
+}
+void generateCodes(Node *root, const string &prefix, unordered_map<char, string> &codes)
+{
+    if (root == nullptr)
+        return;
+    if (root->ch != '$')
+    {
+        codes[root->ch] = prefix;
+    }
+    generateCodes(root->left, prefix + '0', codes);
+    generateCodes(root->right, prefix + '1', codes);
+}
+string encode(const string &data, const unordered_map<char, string> &codes)
+{
+    string encoded = "";
+    for (char ch : data)
+    {
+        encoded += codes.at(ch);
+    }
+    return encoded;
+}
+string decode(const string &encodedData, Node *root)
+{
+    string decoded = "";
+    Node *current = root;
+    for (char bit : encodedData)
+    {
+        current = (bit == '0') ? current->left : current->right;
+        if (current->left == nullptr && current->right == nullptr)
+        {
+            decoded += current->ch;
+            current = root;
+        }
+    }
+    return decoded;
+}
+void printTree(Node *root, string indent = "", bool last = true)
+{
+    if (root == nullptr)
+        return;
+    cout << indent;
+    if (last)
+    {
+        cout << "L----";
+        indent += " ";
+    }
+    else
+    {
+        cout << "R----";
+        indent += "| ";
+    }
+    // Print current node
+    cout << root->ch << ":" << root->freq << endl;
+    // Process right child first
+    printTree(root->right, indent, false);
+    // Process left child
+    printTree(root->left, indent, true);
+}
+int main()
+{
+    cout << "Enter the text to be encoded: ";
+    string data;
+    getline(cin, data);
+    if (data.empty())
+    {
+        cout << "No input provided." << endl;
+        return 1;
+    }
+    unordered_map<char, int> freqs;
+    for (char ch : data)
+    {
+        freqs[ch]++;
+    }
+    Node *root = buildHuffmanTree(freqs);
+    unordered_map<char, string> codes;
+    generateCodes(root, "", codes);
+    string encodedData = encode(data, codes);
+    string decodedData = decode(encodedData, root);
+    cout << "\nCharacter Codes:" << endl;
+    for (const auto &pair : codes)
+    {
+        cout << pair.first << ": " << pair.second << endl;
+    }
+    cout << "\nEncoded data: " << encodedData << endl;
+    cout << "Decoded data: " << decodedData << endl;
+    cout << "\nHuffman Tree:" << endl;
+    printTree(root);
+    return 0;
+}
